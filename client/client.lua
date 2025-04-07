@@ -47,7 +47,7 @@ function StartMission()
         if Config.enableBlipRoute then
             SetBlipRoute(MISSION_BLIP, true)
         end
-        QBCore.Functions.Notify('Your target vehicle\'s plate number: '.. GetVehicleNumberPlateText(vehicle), 'inform', 60000)
+        QBCore.Functions.Notify('Your target vehicle\'s plate number: '.. GetVehicleNumberPlateText(vehicle), 'inform', 40000)
 
         if Config.printLicensePlateToConsole then
             print('Your target vehicle\'s plate number:' .. GetVehicleNumberPlateText(vehicle))
@@ -146,7 +146,7 @@ function StartWheelTheft(vehicle)
             -- If all wheels are removed and the player is not currently holding a wheel,
             -- we stop the wheel theft loop - the rest will be handled by the finish option in RegisterTargetVehicleWithOxTarget
             if allWheelsRemoved and not WHEEL_PROP then
-                QBCore.Functions.Notify('All wheels have been removed. Lower the vehicle to finish.', 'success', 12000)
+                QBCore.Functions.Notify('All wheels have been removed. Lower the vehicle to finish.', 'inform', 8000)
                 return
             end
         else
@@ -645,7 +645,7 @@ function StartWheelDismount(vehicle, wheelIndex, mount, TaskPlayerGoToWheel, coo
         end
     else
         -- Resource not available, just simulate wheel removal
-        QBCore.Functions.Notify('Removing wheel...', 'primary', 5000)
+        QBCore.Functions.Notify('Removing wheel...', 'primary', 2000)
         -- Add a small delay to simulate the minigame
         Citizen.Wait(1500)
     end

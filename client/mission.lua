@@ -225,7 +225,7 @@ function FinishMissionCompletely()
     -- Complete the job by cancelling the mission and cleaning up
     MISSION_ACTIVATED = false
     LocalPlayer.state.MissionCompleted = false
-    QBCore.Functions.Notify('Job completed successfully! The car has been disposed of.', 'success', 8000)
+    QBCore.Functions.Notify('Job completed successfully! The car has been disposed of.', 'success', 5000)
     
     -- Clean up all mission blips using our centralized function
     CleanupAllBlips()
@@ -237,7 +237,7 @@ function FinishMissionCompletely()
     DespawnWorkVehicle()
     
     -- No payment here - just notify player the mission is complete
-    QBCore.Functions.Notify('Mission completed! You already received payment from the seller.', 'primary', 8000)
+    QBCore.Functions.Notify('Mission completed! You already received payment from the seller.', 'primary', 5000)
 
     -- Clean up any brick props left
     if MISSION_BRICKS and #MISSION_BRICKS > 0 then
@@ -353,7 +353,7 @@ function StartMissionWithExistingVehicle(vehicle)
     -- Set global vehicle reference for this mission
     TARGET_VEHICLE = vehicle
     
-    QBCore.Functions.Notify('New mission started with the same vehicle! Steal its wheels again.', 'success', 12000)
+    QBCore.Functions.Notify('New mission started with the same vehicle! Steal its wheels again.', 'success', 8000)
     
     -- Alert police after a delay if that feature is enabled
     if Config.dispatch and Config.dispatch.enabled then

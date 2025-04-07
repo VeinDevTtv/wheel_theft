@@ -1,3 +1,101 @@
+# LS Wheel Theft - Comprehensive Vehicle Theft System
+
+A feature-rich FiveM script for wheel theft, jackstand mechanics, and parts selling. This script provides an immersive criminal enterprise focused on stealing and selling vehicle wheels.
+
+![LS Wheel Theft Banner](https://i.imgur.com/YourBannerImage.png)
+
+## Features
+
+### Complete Wheel Theft System
+- **Mission-based Gameplay**: Receive missions from a Mexican boss to steal wheels from specific vehicles
+- **Target Identification**: Missions provide exact vehicle locations with GPS markers
+- **Realistic Wheel Removal**: Use jackstands to lift vehicles and tools to remove wheels
+- **Wheel Storage System**: Store stolen wheels in your pickup truck
+- **Sales Process**: Deliver stolen wheels to a shady dealer for cash
+
+### Vehicle Mechanics System
+- **Jackstand Mechanics**: Use inventory jackstands to raise and lower vehicles
+- **Realistic Animations**: Proper mechanic animations when working under vehicles
+- **Side-specific Interactions**: Different animations based on which side of the vehicle you approach
+- **Vehicle Stabilization**: Bricks placed under vehicles when raised to show support
+- **Item Management**: Jackstand is removed from inventory when used and returned when vehicle is lowered
+
+### Target Integration
+- **ox_target Support**: Full integration with ox_target for immersive interactions
+- **Contextual Options**: Different target options based on vehicle state and mission status
+- **Bone Targeting**: Precise interaction points for wheel removal
+
+### Police Features
+- **Dispatch System**: Configurable dispatch alerts for police
+- **Alert Chance**: Random chance for police to be notified of thefts
+- **Blip System**: Police receive detailed blip locations of crimes
+
+### Quality of Life
+- **Multilingual Support**: Easy localization through config
+- **Highly Configurable**: Almost every aspect can be customized via config.lua
+- **Optimized Performance**: Efficient code designed for minimal resource usage
+- **QB-Core Integration**: Seamless integration with QB-Core framework
+- **ox_lib Support**: Advanced UI components with ox_lib
+
+## Technical Features
+
+- **Entity State Management**: Robust handling of entity states between clients
+- **Network ID Tracking**: Proper network synchronization of all entities
+- **Cleanup Routines**: Thorough cleanup to prevent resource leaks
+- **Persistent Storage**: Database integration for long-term storage
+
+## Recent Improvements
+
+- **Fixed Brick Positioning**: Bricks now properly touch the ground when vehicles are lowered
+- **Enhanced Jackstand Animations**: Correct animations work from both sides of the vehicle
+- **Jackstand Recovery**: Jackstands are returned to inventory when lowering vehicles
+- **Different Mission Characters**: Mexican boss for mission giving, Mexican gang member for buying stolen goods
+- **Realistic Lowering Mechanics**: Jackstands remain in place while only the vehicle lowers
+
+## Requirements
+
+- QB-Core Framework
+- ox_target
+- ox_inventory (recommended)
+- ox_lib (optional but enhances UI)
+
+## Installation
+
+1. Place the `wheel_theft` folder in your server resources directory
+2. Add `ensure wheel_theft` to your server.cfg
+3. Import the provided SQL file for item definitions
+4. Configure the script in `config.lua`
+5. Restart your server
+
+## Configuration
+
+The script is highly configurable through the `config.lua` file. Key configurations include:
+
+- Vehicle models for theft missions
+- Payment amounts and variations
+- Police notification settings
+- Spawn locations for mission vehicles
+- PED models for dealers and mission givers
+- Blip settings and visibility
+
+## Documentation
+
+For detailed documentation on how to configure the script, refer to the [Configuration Guide](https://link-to-your-docs.com).
+
+## Credits
+
+- Original development by Your Development Team
+- Animations and prop models by Rockstar Games
+- Special thanks to the testing team for their valuable feedback
+
+## Support
+
+For support, join our [Discord server](https://discord.gg/your-discord) or open an issue on our [GitHub repository](https://github.com/your-org/wheel_theft).
+
+## License
+
+This script is licensed under the MIT License. See the LICENSE file for details.
+
 # Task 1: Despawning Work Vehicle on Mission Cancel
 
 Added a WORK_VEHICLE variable in client/truckSpawn.lua to track the vehicle.

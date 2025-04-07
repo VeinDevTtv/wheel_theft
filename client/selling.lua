@@ -70,7 +70,7 @@ function EnableSale()
         return
     end
     
-    QBCore.Functions.Notify('Starting the sale process...', 'inform', 3000)
+    QBCore.Functions.Notify('Starting the sale process... Spawning seller and crate', 'inform', 4000)
     
     local ped = SpawnPed(sellerTable)
     local blip = sellerTable.blip
@@ -106,7 +106,7 @@ function EnableSale()
     saleActive = true
     ContinueSale(ped, crateProp)
     
-    QBCore.Functions.Notify('Take your wheels to the crate and then complete the sale with the dealer', 'success', 10000)
+    QBCore.Functions.Notify('Take your wheels to the crate and then complete the sale with the dealer', 'success', 8000)
 end
 
 function RegisterSellerPedWithOxTarget(sellerPed)
@@ -139,10 +139,13 @@ function RegisterSellerPedWithOxTarget(sellerPed)
         }
     }
     
+    -- Debug info
+    QBCore.Functions.Notify('Registering seller with target system (NetID: ' .. sellerPedNetId .. ')', 'primary', 2000)
+    
     -- Register with ox_target using just the entity
     exports.ox_target:addLocalEntity(sellerPed, options)
     
-    QBCore.Functions.Notify('Seller is ready. Drop off all wheels in the crate, then talk to the seller.', 'success', 8000)
+    QBCore.Functions.Notify('Seller is ready. Drop off all wheels in the crate, then talk to the seller.', 'success', 5000)
 end
 
 function RegisterCrateWithOxTarget(crateProp)
@@ -181,6 +184,9 @@ function RegisterCrateWithOxTarget(crateProp)
             end
         }
     }
+    
+    -- Debug info
+    QBCore.Functions.Notify('Registering crate with target system (NetID: ' .. cratePropNetId .. ')', 'primary', 2000)
     
     -- Register with ox_target using local entity
     exports.ox_target:addLocalEntity(crateProp, options)
@@ -260,7 +266,7 @@ function CompleteSale(sellerPed)
     -- Make server-side payment - THIS IS THE ONLY PAYMENT PLAYER WILL RECEIVE
     TriggerServerEvent('ls_wheel_theft:server:CompleteSale', 4)  -- Always pay for 4 wheels
     
-    QBCore.Functions.Notify('Sale completed and payment received! Return to the mission giver to finish the job. (No additional payment will be given)', 'success', 15000)
+    QBCore.Functions.Notify('Sale completed and payment received! Return to the mission giver to finish the job. (No additional payment will be given)', 'success', 10000)
     
     -- Create a blip to guide the player back to the mission giver
     local missionTable = Config.missionPeds['mission_ped']
@@ -306,16 +312,16 @@ AddEventHandler('onResourceStop', function(resourceName)
     end
 end)
 
-function DropOffWheel(crate, wheelCount)
-    if not crate or not DoesEntityExist(crate) then
+function DropOffWheel(crateProp, wheelCount)
+    if not crateProp or not DoesEntityExist(crateProp) then
         QBCore.Functions.Notify('ERROR: Drop off crate does not exist', 'error', 5000)
-        return false
+        return
     end
     
-    QBCore.Functions.Notify('Dropping off wheel ' .. wheelCount .. ' of 4...', 'primary', 5000)
+    QBCore.Functions.Notify('Dropping off wheel ' .. wheelCount .. ' of 4...', 'primary', 3000)
     
     local player = PlayerPedId()
-    local coords = GetEntityCoords(crate)
+    local coords = GetEntityCoords(crateProp)
 
     -- Delete the wheel in player's hands
     if HOLDING_WHEEL and DoesEntityExist(HOLDING_WHEEL) then
@@ -346,12 +352,12 @@ function DropOffWheel(crate, wheelCount)
     
     -- Stack wheels vertically one over one using zTable for heights
     local zTable = {0.15, 0.35, 0.55, 0.75}
-    AttachEntityToEntity(wheelProp, crate, 0, 0.0, 0.0, zTable[wheelCount], -90.0, 0.0, 0.0, true, true, false, false, 2, true)
+    AttachEntityToEntity(wheelProp, crateProp, 0, 0.0, 0.0, zTable[wheelCount], -90.0, 0.0, 0.0, true, true, false, false, 2, true)
     
     -- Store the wheel properly in the storedWheels array at the specific index
     storedWheels[wheelCount] = wheelProp
     
     if wheelCount == 4 then
-        QBCore.Functions.Notify('All wheels have been dropped off. Speak to the seller to complete the sale!', 'success', 8000)
+        QBCore.Functions.Notify('All wheels have been dropped off. Speak to the seller to complete the sale!', 'success', 5000)
     end
 end

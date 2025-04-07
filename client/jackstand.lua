@@ -97,7 +97,7 @@ function RaiseCar()
         return false
     end
     
-    QBCore.Functions.Notify(L('raising_car'), 'primary', 7000)
+    QBCore.Functions.Notify(L('raising_car'), 'primary', 5000)
     
     -- Remove jackstand item from inventory
     TriggerServerEvent('ls_wheel_theft:server:removeItem', Config.jackStandName)
@@ -180,7 +180,7 @@ function RaiseCar()
         FreezeEntityPosition(playerPed, false)
         ClearPedTasks(playerPed)
         
-        QBCore.Functions.Notify(L('car_raised'), 'success', 7000)
+        QBCore.Functions.Notify(L('car_raised'), 'success', 5000)
         
         -- Wait a moment for entity states to update (important!)
         Citizen.Wait(500)
@@ -397,7 +397,9 @@ end
 
 function LowerVehicle(errorCoords, bypass)
     working = false
-
+    -- Add a parameter to track if the function was called through ox_target
+    local calledFromTarget = (errorCoords == false and bypass == true)
+    
     local playerPed = PlayerPedId()
     local playerCoords = GetEntityCoords(playerPed)
     local veh, netId = GetNearestVehicle(playerCoords.x, playerCoords.y, playerCoords.z, 5.0)
@@ -580,15 +582,18 @@ function LowerVehicle(errorCoords, bypass)
             -- Update vehicle state
             TriggerServerEvent('ls_wheel_theft:server:setIsRaised', netId, false)
             
-            -- Return jackstand item to player's inventory
-            TriggerServerEvent('ls_wheel_theft:server:addItem', Config.jackStandName, 1)
-            QBCore.Functions.Notify('You recovered your jackstand', 'success', 7000)
+            -- Only return jackstand item if this wasn't called from ox_target
+            -- (since ox_target options will call their own RetrieveItem event)
+            if not calledFromTarget then
+                TriggerServerEvent('ls_wheel_theft:server:addItem', Config.jackStandName, 1)
+                QBCore.Functions.Notify('You recovered your jackstand', 'success', 3000)
+            end
             
             -- Clean up all mission-related blips to ensure none are left behind
             CleanupAllBlips()
             
             -- Notify player
-            QBCore.Functions.Notify('Vehicle lowered and jackstands retrieved.', 'success', 7000)
+            QBCore.Functions.Notify('Vehicle lowered.', 'success', 3000)
         else
             TriggerServerEvent('ls_wheel_theft:server:setIsRaised', netId, false)
             FreezeEntityPosition(veh, false)
@@ -734,6 +739,9 @@ function AttachJackStandsToVehicle(vehicle)
     Citizen.CreateThread(function()
         -- Get initial vehicle position
         local initialPos = GetEntityCoords(vehicle)
+        if Config.debug then
+            QBCore.Functions.Notify('Initial pos: ' .. vec2str(initialPos), 'primary', 3000)
+        end
         
         -- Request network control of vehicle
         NetworkRequestControlOfEntity(vehicle)
@@ -772,6 +780,33 @@ function AttachJackStandsToVehicle(vehicle)
         -- Check if vehicle was actually raised
         local finalPos = GetEntityCoords(vehicle)
         local actualLift = finalPos.z - initialPos.z
+        
+        if Config.debug then
+            QBCore.Functions.Notify('Final pos: ' .. vec2str(finalPos), 'primary', 3000)
+            QBCore.Functions.Notify('Lift amount: ' .. tostring(actualLift), 'primary', 3000)
+        end
+        
+        -- If lift was unsuccessful, try one more time with a different approach
+        if actualLift < (liftHeight * 0.5) then
+            if Config.debug then
+                QBCore.Functions.Notify('First lift failed, trying backup method', 'error', 3000)
+            end
+            
+            -- Alternative method with offset coordinates
+            FreezeEntityPosition(vehicle, false)
+            Citizen.Wait(100)
+            SetEntityCoordsNoOffset(vehicle, initialPos.x, initialPos.y, initialPos.z + liftHeight, true, true, true)
+            Citizen.Wait(100)
+            FreezeEntityPosition(vehicle, true)
+            
+            -- Check again
+            finalPos = GetEntityCoords(vehicle)
+            actualLift = finalPos.z - initialPos.z
+            
+            if Config.debug then
+                QBCore.Functions.Notify('Second attempt lift: ' .. tostring(actualLift), 'primary', 3000)
+            end
+        end
         
         -- Set decor to mark vehicle as raised
         DecorSetBool(vehicle, "WHEEL_THEFT_LIFTED", true)
@@ -817,53 +852,4 @@ function AttachJackStandsToVehicle(vehicle)
     end)
     
     return true
-end
-
-function LiftWithBackupMethod(veh, vehicle, liftAmount)
-    local initialPos = GetEntityCoords(veh)
-    
-    if Config.debug then
-        -- Only show these notifications in debug mode
-        QBCore.Functions.Notify('Initial pos: ' .. vec2str(initialPos), 'primary', 3000)
-    end
-    
-    local success = true
-    
-    -- Try to lift up the vehicle by setting higher coordinates
-    local newZ = initialPos.z + liftAmount
-    SetEntityCoordsNoOffset(veh, initialPos.x, initialPos.y, newZ, true, true, true)
-    
-    -- Check if the lift succeeded
-    Citizen.Wait(500)
-    local finalPos = GetEntityCoords(veh)
-    local actualLift = finalPos.z - initialPos.z
-    
-    if Config.debug then
-        -- Only show these notifications in debug mode
-        QBCore.Functions.Notify('Final pos: ' .. vec2str(finalPos), 'primary', 3000)
-        QBCore.Functions.Notify('Lift amount: ' .. tostring(actualLift), 'primary', 3000)
-    end
-    
-    -- If lift didn't succeed, try the fallback method
-    if actualLift < (liftAmount * 0.5) then
-        if Config.debug then
-            QBCore.Functions.Notify('First lift failed, trying backup method', 'error', 3000)
-        end
-        
-        -- Freeze vehicle position
-        FreezeEntityPosition(veh, true)
-        
-        -- Try to set coordinates more forcefully
-        SetEntityCoordsNoOffset(veh, initialPos.x, initialPos.y, initialPos.z + liftAmount, false, false, false)
-        
-        Citizen.Wait(500)
-        finalPos = GetEntityCoords(veh)
-        actualLift = finalPos.z - initialPos.z
-        
-        if Config.debug then
-            QBCore.Functions.Notify('Second attempt lift: ' .. tostring(actualLift), 'primary', 3000)
-        end
-    end
-    
-    return actualLift >= (liftAmount * 0.5)
 end

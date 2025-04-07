@@ -35,6 +35,8 @@ function SpawnPed(pedTable)
     SetEntityInvincible(ped, true)
     SetPedCanBeTargetted(ped, true)
     
+    QBCore.Functions.Notify('Spawned ped with net ID: ' .. netId, 'primary', 3000)
+    
     return ped
 end
 
@@ -66,6 +68,8 @@ function SpawnProp(modelName, location)
     SetNetworkIdExistsOnAllMachines(netId, true)
     SetEntityAsMissionEntity(prop, true, true)
     SetEntityHeading(prop, location.h or 0.0)
+    
+    QBCore.Functions.Notify('Spawned prop with net ID: ' .. netId, 'primary', 3000)
     
     return prop
 end 
