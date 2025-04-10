@@ -488,5 +488,5 @@ function CleanupAllBlips()
         truckBlip = nil
     end
     
-    QBCore.Functions.Notify('All mission blips have been cleaned up', 'primary', 2000)
+   -- QBCore.Functions.Notify('All mission blips have been cleaned up', 'primary', 2000)
 end

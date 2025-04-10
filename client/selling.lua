@@ -70,7 +70,7 @@ function EnableSale()
         return
     end
     
-    QBCore.Functions.Notify('Starting the sale process... Spawning seller and crate', 'inform', 4000)
+   -- QBCore.Functions.Notify('Starting the sale process... Spawning seller and crate', 'inform', 4000)
     
     local ped = SpawnPed(sellerTable)
     local blip = sellerTable.blip
@@ -140,7 +140,7 @@ function RegisterSellerPedWithOxTarget(sellerPed)
     }
     
     -- Debug info
-    QBCore.Functions.Notify('Registering seller with target system (NetID: ' .. sellerPedNetId .. ')', 'primary', 2000)
+   -- QBCore.Functions.Notify('Registering seller with target system (NetID: ' .. sellerPedNetId .. ')', 'primary', 2000)
     
     -- Register with ox_target using just the entity
     exports.ox_target:addLocalEntity(sellerPed, options)
@@ -186,7 +186,7 @@ function RegisterCrateWithOxTarget(crateProp)
     }
     
     -- Debug info
-    QBCore.Functions.Notify('Registering crate with target system (NetID: ' .. cratePropNetId .. ')', 'primary', 2000)
+  --  QBCore.Functions.Notify('Registering crate with target system (NetID: ' .. cratePropNetId .. ')', 'primary', 2000)
     
     -- Register with ox_target using local entity
     exports.ox_target:addLocalEntity(crateProp, options)
