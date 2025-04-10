@@ -2,7 +2,7 @@ local waitTime = 5
 local height = 0.18
 local targetVehicleNetIds = {} -- Initialize at the top of the file to avoid nil references
 -----------------------------------------------------------------------------------------------------------------------------------------------------
--- Function to check if vehicle is a car
+-- Function to check if vehicle is a car ------------------------------------------------------------------------------------------------------------
 -----------------------------------------------------------------------------------------------------------------------------------------------------
 IsCar = function(veh)
     local vc = GetVehicleClass(veh)
@@ -77,7 +77,7 @@ function RaiseCar()
             return false
         end
     end
-    
+
     -- Make sure it's a car
     if not IsCar(vehicle) then
         QBCore.Functions.Notify(L('not_a_car'), 'error', 5000)
@@ -96,41 +96,41 @@ function RaiseCar()
         QBCore.Functions.Notify('Vehicle is already raised', 'error', 5000)
         return false
     end
-    
+
     QBCore.Functions.Notify(L('raising_car'), 'primary', 5000)
-    
+
     -- Remove jackstand item from inventory
     TriggerServerEvent('ls_wheel_theft:server:removeItem', Config.jackStandName)
-    
+
     -- Determine which side of the vehicle the player is on
     local playerPed = PlayerPedId()
     local vehCoords = GetEntityCoords(vehicle)
     local playerCoords = GetEntityCoords(playerPed)
-    
+
     -- Get vehicle dimensions
     local min, max = GetModelDimensions(GetEntityModel(vehicle))
     local vehicleWidth = max.x - min.x
-    
+
     -- Calculate relative position to determine which side of the vehicle the player is on
     local vehicleHeading = GetEntityHeading(vehicle)
     local vehicleHeadingRad = math.rad(vehicleHeading)
     local relativeX = (playerCoords.x - vehCoords.x) * math.cos(vehicleHeadingRad) + 
                       (playerCoords.y - vehCoords.y) * math.sin(vehicleHeadingRad)
-    
+
     -- Determine if player is on the left or right side
     local isOnRightSide = relativeX > 0
-    
+
     -- Calculate the position where the player should move to
     local offsetX = isOnRightSide and (vehicleWidth/2 + 0.5) or -(vehicleWidth/2 + 0.5)
     local positionOffset = vector3(offsetX, 0.0, 0.0)
-    
+
     -- Calculate the world position
     local worldOffset = GetOffsetFromEntityInWorldCoords(vehicle, positionOffset.x, positionOffset.y, positionOffset.z)
-    
+
     -- Move player to position with increased height adjustment to prevent ground clipping
     local _, groundZ = GetGroundZFor_3dCoord(worldOffset.x, worldOffset.y, worldOffset.z, true)
     SetEntityCoordsNoOffset(playerPed, worldOffset.x, worldOffset.y, groundZ + 1.0, false, false, false)
-    
+
     -- Calculate heading based on which side of the vehicle the player is on
     -- If player is on the left side, face right (90 degrees from vehicle heading)
     -- If player is on the right side, face left (270 degrees from vehicle heading)
@@ -140,16 +140,16 @@ function RaiseCar()
     else
         targetHeading = (vehicleHeading + 270) % 360
     end
-    
+
     -- Set player heading
     SetEntityHeading(playerPed, targetHeading)
-    
+
     -- Set the animation to make player lie down (mechanic animation)
     local animDict = "anim@amb@clubhouse@tutorial@bkr_tut_ig3@"
     local anim = "machinic_loop_mechandplayer"
     local flags = 1 -- Non-looping animation
     local animTime = 5000
-    
+
     RequestAnimDict(animDict)
     local timeout = 1000
     while not HasAnimDictLoaded(animDict) and timeout > 0 do
@@ -585,7 +585,7 @@ function LowerVehicle(errorCoords, bypass)
             -- Only return jackstand item if this wasn't called from ox_target
             -- (since ox_target options will call their own RetrieveItem event)
             if not calledFromTarget then
-                TriggerServerEvent('ls_wheel_theft:server:addItem', Config.jackStandName, 1)
+            --    TriggerServerEvent('ls_wheel_theft:server:addItem', Config.jackStandName, 1)
                 QBCore.Functions.Notify('You recovered your jackstand', 'success', 3000)
             end
             
@@ -758,9 +758,9 @@ function AttachJackStandsToVehicle(vehicle)
         FreezeEntityPosition(vehicle, false)
         Citizen.Wait(100)
         
-        -- Implement gradual lifting animation - simplified approach
+        -- Implement gradual lifting animation
         local addZ = 0
-        local liftHeight = 0.35 -- Target lift height
+        local liftHeight = 0.28 -- Target lift height
         
         while addZ < liftHeight do
             addZ = addZ + 0.001

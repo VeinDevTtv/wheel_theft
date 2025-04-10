@@ -1,218 +1,125 @@
-# LS Wheel Theft - Comprehensive Vehicle Theft System
+# LS Wheel Theft - Comprehensive Vehicle Wheel Theft System
 
-A feature-rich FiveM script for wheel theft, jackstand mechanics, and parts selling. This script provides an immersive criminal enterprise focused on stealing and selling vehicle wheels.
+A feature-rich FiveM script that allows players to engage in wheel theft activities, providing an immersive criminal pathway with missions, tools, and a complete theft-to-sale pipeline.
 
-![LS Wheel Theft Banner](https://i.imgur.com/YourBannerImage.png)
+![LS Wheel Theft](https://i.imgur.com/W4IOZTG.png)
 
-## Features
+## What is Wheel Theft?
 
-### Complete Wheel Theft System
-- **Mission-based Gameplay**: Receive missions from a Mexican boss to steal wheels from specific vehicles
-- **Target Identification**: Missions provide exact vehicle locations with GPS markers
-- **Realistic Wheel Removal**: Use jackstands to lift vehicles and tools to remove wheels
-- **Wheel Storage System**: Store stolen wheels in your pickup truck
-- **Sales Process**: Deliver stolen wheels to a shady dealer for cash
+LS Wheel Theft creates a complete criminal enterprise revolving around stealing wheels from vehicles across Los Santos. Players can:
 
-### Vehicle Mechanics System
-- **Jackstand Mechanics**: Use inventory jackstands to raise and lower vehicles
-- **Realistic Animations**: Proper mechanic animations when working under vehicles
-- **Side-specific Interactions**: Different animations based on which side of the vehicle you approach
-- **Vehicle Stabilization**: Bricks placed under vehicles when raised to show support
-- **Item Management**: Jackstand is removed from inventory when used and returned when vehicle is lowered
+1. Receive missions from a criminal contact (configurable NPC)
+2. Locate target vehicles using mission waypoints
+3. Use jackstands to lift vehicles realistically
+4. Remove and steal wheels using proper animations and tools
+5. Store wheels in a provided work truck
+6. Sell stolen wheels to a buyer for cash rewards
 
-### Target Integration
-- **ox_target Support**: Full integration with ox_target for immersive interactions
-- **Contextual Options**: Different target options based on vehicle state and mission status
-- **Bone Targeting**: Precise interaction points for wheel removal
+## Key Features
 
-### Police Features
-- **Dispatch System**: Configurable dispatch alerts for police
-- **Alert Chance**: Random chance for police to be notified of thefts
-- **Blip System**: Police receive detailed blip locations of crimes
+### Immersive Theft Mechanics
+- **Realistic Vehicle Lifting**: Use jackstands that physically raise vehicles
+- **Proper Animations**: Different animations based on which side of the vehicle you approach
+- **Visual Feedback**: Bricks appear under vehicles to show support when raised
+- **Wheel Removal**: Realistic wheel removal process with appropriate timing
 
-### Quality of Life
-- **Multilingual Support**: Easy localization through config
-- **Highly Configurable**: Almost every aspect can be customized via config.lua
-- **Optimized Performance**: Efficient code designed for minimal resource usage
-- **QB-Core Integration**: Seamless integration with QB-Core framework
-- **ox_lib Support**: Advanced UI components with ox_lib
+### Complete Mission System
+- **Criminal Contact**: Speak with an NPC to get wheel theft missions
+- **Target Locations**: GPS-marked locations for vehicles with valuable wheels
+- **Work Vehicle**: Receive a work truck to transport stolen wheels
+- **Buyer NPC**: Separate character who buys the stolen wheels
 
-## Technical Features
+### Police Integration
+- **Dispatch Alerts**: Configurable chance to alert police during thefts
+- **Blip System**: Police can receive location information about thefts in progress
 
-- **Entity State Management**: Robust handling of entity states between clients
-- **Network ID Tracking**: Proper network synchronization of all entities
-- **Cleanup Routines**: Thorough cleanup to prevent resource leaks
-- **Persistent Storage**: Database integration for long-term storage
+### Framework Support
+- **Multi-Framework**: Supports QB-Core, ESX, and ox frameworks
+- **ox_target Integration**: Full support for contextual interactions
+- **ox_inventory**: Compatible with the popular inventory system
 
-## Recent Improvements
+## Setup Guide
 
-- **Fixed Brick Positioning**: Bricks now properly touch the ground when vehicles are lowered
-- **Enhanced Jackstand Animations**: Correct animations work from both sides of the vehicle
-- **Jackstand Recovery**: Jackstands are returned to inventory when lowering vehicles
-- **Different Mission Characters**: Mexican boss for mission giving, Mexican gang member for buying stolen goods
-- **Realistic Lowering Mechanics**: Jackstands remain in place while only the vehicle lowers
-
-## Requirements
-
-- QB-Core Framework
-- ox_target
+### Prerequisites
+- A FiveM server running QB-Core, ESX, or ox framework
+- ox_target (recommended)
 - ox_inventory (recommended)
 - ox_lib (optional but enhances UI)
 
-## Installation
+### Basic Installation
 
-1. Place the `wheel_theft` folder in your server resources directory
-2. Add `ensure wheel_theft` to your server.cfg
-3. Import the provided SQL file for item definitions
-4. Configure the script in `config.lua`
-5. Restart your server
+1. **Download & Place Files**
+   - Download the script
+   - Extract and place the `wheel_theft` folder in your server resources directory
 
-## Configuration
+2. **Choose Your Framework Setup**
+   - For QB-Core: Copy files from `_qb_setup` folder to your main QB resources
+   - For ESX: Copy files from `_esx_setup` folder to your main ESX resources
+   - For ox: Copy files from `_ox_setup` folder to your main ox resources
 
-The script is highly configurable through the `config.lua` file. Key configurations include:
+3. **Add Items to Your Inventory**
+   - Add the following items to your inventory system (SQL files provided in setup folders):
+     - `jackstand` - Used to lift vehicles
+     - `wheel` - The item players steal and sell
 
-- Vehicle models for theft missions
-- Payment amounts and variations
-- Police notification settings
-- Spawn locations for mission vehicles
-- PED models for dealers and mission givers
-- Blip settings and visibility
+4. **Configure the Script**
+   - Open `config.lua` and adjust settings to your preference
+   - Key settings to change:
+     - Mission locations
+     - Payment amounts
+     - Police notification chance
+     - NPC appearances and locations
 
-## Documentation
+5. **Start the Resource**
+   - Add `ensure wheel_theft` to your server.cfg
+   - Restart your server or start the resource
 
-For detailed documentation on how to configure the script, refer to the [Configuration Guide](https://link-to-your-docs.com).
+### Advanced Configuration
 
-## Credits
+The `config.lua` file offers extensive customization options:
 
-- Original development by Your Development Team
-- Animations and prop models by Rockstar Games
-- Special thanks to the testing team for their valuable feedback
+- **Vehicle Models**: Change which vehicles can be targeted for wheel theft
+- **Payment Settings**: Adjust how much players earn per wheel
+- **NPC Customization**: Change the appearance and location of mission givers and buyers
+- **Police Settings**: Configure police notification chances and response
+- **Mission Settings**: Adjust difficulty, spawn locations, and requirements
+
+## Usage for Players
+
+1. **Starting a Mission**
+   - Find the mission giver NPC (marked on map if configured)
+   - Interact with them to receive a wheel theft mission
+   - A work truck will spawn for you to use
+
+2. **Finding Target Vehicles**
+   - Follow the GPS waypoint to the target vehicle
+   - Approach the vehicle to begin the theft process
+
+3. **Stealing Wheels**
+   - Use a jackstand to lift the vehicle (approach wheels and use target)
+   - Remove the wheels once the vehicle is lifted
+   - Lower the vehicle when done
+
+4. **Storing and Selling**
+   - Store wheels in the work truck
+   - Drive to the buyer location
+   - Sell the wheels for cash
+
+## Troubleshooting
+
+- **Vehicles not lifting**: Make sure ox_target is working correctly
+- **Items not showing**: Check that items were properly added to your inventory system
+- **NPCs not appearing**: Verify the coordinates in your config.lua match your map
 
 ## Support
 
-For support, join our [Discord server](https://discord.gg/your-discord) or open an issue on our [GitHub repository](https://github.com/your-org/wheel_theft).
+For support, please refer to the provided documentation or contact the developer through the platform where you purchased the script.
 
 ## License
 
 This script is licensed under the MIT License. See the LICENSE file for details.
 
-# Task 1: Despawning Work Vehicle on Mission Cancel
+## Credits
 
-Added a WORK_VEHICLE variable in client/truckSpawn.lua to track the vehicle.
-
-Modified SpawnTruck to store the vehicle reference.
-
-Created DespawnWorkVehicle to remove the vehicle properly.
-
-Called this function from CancelMission in client/mission.lua.
-
-Added cleanup when the resource stops.
-
-Ensured it only despawns when the player cancels via the NPC.
-
-# Task 2: Implementing ox_target for Interactions
-
-## Replaced key presses (E/H) with ox_target:
-
-**Mission NPCs (Start/Cancel):**
-
-Added network ID tracking.
-
-Created dynamic options based on mission state.
-
-Cleaned up properly when missions end.
-
-**Seller Ped & Crate (Sale/Drop Wheels):**
-
-Added target options with state-based availability.
-
-Ensured proper cleanup.
-
-**Vehicle Wheel Theft:**
-
-Implemented bone-targeting for precise interactions.
-
-Added different options for target vs. non-target vehicles.
-
-Included options for lowering vehicles and finishing theft.
-
-**Truck Interactions (Store/Take Wheels):**
-
-Added target options for storing and retrieving wheels.
-
-Ensured proper cleanup.
-
-# Code Changes Summary
-
-## Files Affected
-- `client/client.lua`
-
-## New Functions Added
-1. `RegisterTargetVehicleWithOxTarget(vehicle, isTargetVehicle)`
-   - Handles vehicle registration with ox_target
-   - Adds wheel theft options
-   - Manages vehicle cleanup
-   - Parameters:
-     - vehicle: The target vehicle entity
-     - isTargetVehicle: Boolean indicating if it's a mission vehicle
-
-2. `RegisterTruckWithOxTarget(vehicle)`
-   - Manages truck registration for wheel storage
-   - Handles wheel storage options
-   - Parameters:
-     - vehicle: The truck entity
-
-## Modified Functions
-1. `StartWheelTheft(vehicle)`
-   - Added ox_target integration
-   - Improved vehicle tracking
-   - Enhanced wheel theft process
-
-2. `StopWheelTheft(vehicle)`
-   - Added ox_target cleanup
-   - Improved vehicle state management
-   - Enhanced mission completion handling
-
-3. `BeginWheelLoadingIntoTruck(wheelProp)`
-   - Added ox_target integration
-   - Improved wheel storage process
-   - Enhanced truck interaction
-
-4. `EnableWheelTakeOut()`
-   - Added ox_target integration
-   - Improved wheel retrieval process
-   - Enhanced truck interaction
-
-## New Variables Added
-1. `targetVehicleNetIds`
-   - Array to track registered target vehicles
-   - Used for cleanup and management
-
-2. `truckNetId`
-   - Stores the network ID of the current truck
-   - Used for truck-specific operations
-
-## Resource Management
-- Added comprehensive cleanup in `onResourceStop` handler
-- Improved vehicle tracking and deletion
-- Enhanced ox_target entity management
-
-## Integration Points
-1. ox_target Integration
-   - Vehicle registration
-   - Wheel theft options
-   - Truck storage options
-   - Entity cleanup
-
-2. Vehicle Management
-   - Improved vehicle state tracking
-   - Enhanced cleanup procedures
-   - Better mission vehicle handling
-
-## Total Changes
-- 4 new functions
-- 4 modified functions
-- 2 new variables
-- 1 new event handler
-- Improved resource management
-- Enhanced integration with ox_target
+- Remade by iiTzVein.
+- Thanks to me.

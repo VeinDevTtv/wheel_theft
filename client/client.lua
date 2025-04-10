@@ -18,13 +18,15 @@ STORED_WHEELS = {}
 WHEEL_PROP = nil
 TARGET_VEHICLE = nil
 MISSION_BRICKS = {}
+CURRENT_LOCATION_INDEX = nil
 
 -- Variables for ox_target integration
 local targetVehicleNetIds = {}
 local truckNetId = nil
 
-function StartMission()
+function StartMission(specificLocation, locationIndex)
     MISSION_ACTIVATED = true
+    CURRENT_LOCATION_INDEX = locationIndex
 
     if Config.spawnPickupTruck.enabled then
         SpawnTruck()
@@ -33,7 +35,7 @@ function StartMission()
     Citizen.CreateThread(function()
         local sleep = 1500
         local vehicleModel = Config.vehicleModels[math.random(1, #Config.vehicleModels)]
-        local missionLocation = Config.missionLocations[math.random(1, #Config.missionLocations)]
+        local missionLocation = specificLocation or Config.missionLocations[math.random(1, #Config.missionLocations)]
         local coords = ModifyCoordinatesWithLimits(missionLocation.x, missionLocation.y, missionLocation.z, missionLocation.h)
         local player = PlayerPedId()
         local blip = Config.missionBlip
@@ -817,3 +819,28 @@ function IsCar(entity)
         return false
     end
 end
+
+-- At the end of the file, add this event handler
+RegisterNetEvent('ls_wheel_theft:Client:StartMission')
+AddEventHandler('ls_wheel_theft:Client:StartMission', function(location, locationIndex)
+    -- Start the mission with the location provided by the server
+    StartMission(location, locationIndex)
+end)
+
+-- Add a disconnection handler to free locations if a player disconnects
+AddEventHandler('onResourceStop', function(resourceName)
+    if GetCurrentResourceName() == resourceName then
+        -- Free any occupied location before resource stops
+        if CURRENT_LOCATION_INDEX then
+            TriggerServerEvent('ls_wheel_theft:FreeLocation', CURRENT_LOCATION_INDEX)
+            CURRENT_LOCATION_INDEX = nil
+        end
+    end
+end)
+
+-- Also free location on player disconnect
+AddEventHandler('playerDropped', function()
+    if CURRENT_LOCATION_INDEX then
+        TriggerServerEvent('ls_wheel_theft:FreeLocation', CURRENT_LOCATION_INDEX)
+    end
+end)

@@ -1,0 +1,20 @@
+# FiveM Resource .gitignore
+
+# Ignore common build files
+node_modules/
+build/
+dist/
+
+# Ignore common system files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore editor files
+.vscode/
+.idea/
+*.sublime-*
+
+# Ignore logs
+*.log
+logs/ 

@@ -166,6 +166,12 @@ function CancelMission()
     -- Use the centralized blip cleanup function
     CleanupAllBlips()
 
+    -- Free the location so other players can use it
+    if CURRENT_LOCATION_INDEX then
+        TriggerServerEvent('ls_wheel_theft:FreeLocation', CURRENT_LOCATION_INDEX)
+        CURRENT_LOCATION_INDEX = nil
+    end
+
     -- Despawn the work vehicle if it exists
     -- This ensures the truck is only removed when a player explicitly cancels the mission by speaking to the NPC
     -- The function is defined in truckSpawn.lua and handles vehicle cleanup
@@ -229,6 +235,12 @@ function FinishMissionCompletely()
     
     -- Clean up all mission blips using our centralized function
     CleanupAllBlips()
+    
+    -- Free the location so other players can use it
+    if CURRENT_LOCATION_INDEX then
+        TriggerServerEvent('ls_wheel_theft:FreeLocation', CURRENT_LOCATION_INDEX)
+        CURRENT_LOCATION_INDEX = nil
+    end
     
     -- Reset payment state for future missions
     LocalPlayer.state.AlreadyPaid = false

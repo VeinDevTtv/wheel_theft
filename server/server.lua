@@ -139,7 +139,8 @@ AddEventHandler('ls_wheel_theft:server:GiveJobBonus', function()
     local _source = source
     
     -- No payment, just notify the player
-    TriggerClientEvent('QBCore:Notify', _source, 'Mission complete! Payment was already received from the seller.', 'primary', 5000)
+  -- Ma3ndna mandiro bhadchi
+  --  TriggerClientEvent('QBCore:Notify', _source, 'Mission complete! Payment was already received from the seller.', 'primary', 5000)
 end)
 
 -- Event handler for completing the sale at the seller
