@@ -58,7 +58,13 @@ end
 
 -- Function to get an available location
 local function GetAvailableLocation(playerId)
-    -- Force reset all locations if this is the only player
+    -- Debug print current occupied locations
+    print("^3[wheel_theft] Current occupied locations:")
+    for idx, pid in pairs(occupiedLocations) do
+        print("^3[wheel_theft] Location " .. idx .. " is occupied by player " .. pid)
+    end
+    
+    -- Force reset all locations only if this is the only player online
     local playerCount = GetNumPlayerIndices()
     if playerCount <= 1 then
         print("^2[wheel_theft] Only one player online, ensuring all locations are available")
@@ -85,6 +91,8 @@ local function GetAvailableLocation(playerId)
     
     -- Pick a random available location
     local selected = availableLocations[math.random(1, #availableLocations)]
+    
+    -- Mark as occupied BEFORE returning to prevent race conditions
     occupiedLocations[selected.index] = playerId
     
     print("^2[wheel_theft] Assigned location " .. selected.index .. " to player " .. playerId)
@@ -129,6 +137,21 @@ AddEventHandler('ls_wheel_theft:StartMission', function()
         return 
     end
 
+    -- Check if player already has an active mission
+    local playerHasActiveMission = false
+    for locationIndex, playerId in pairs(occupiedLocations) do
+        if tonumber(playerId) == tonumber(src) then
+            playerHasActiveMission = true
+            print("^3[wheel_theft] Player " .. src .. " already has an active mission at location " .. locationIndex)
+            break
+        end
+    end
+    
+    if playerHasActiveMission then
+        TriggerClientEvent('QBCore:Notify', src, 'You already have an active mission. Complete or cancel it first.', 'error')
+        return
+    end
+
     -- Print the player's information for debugging
     print("^3[wheel_theft] Player found: " .. Player.PlayerData.name)
     
@@ -146,17 +169,23 @@ AddEventHandler('ls_wheel_theft:StartMission', function()
     -- Get an available location
     local location, locationIndex = GetAvailableLocation(src)
     
-    print("^3[wheel_theft] Available location found: " .. tostring(location ~= nil))
-    
+    -- If no location is available and multiple players online, send notification
     if not location then
-        -- If no location is available, reset all locations and try again
-        print("^2[wheel_theft] No locations available, resetting all locations")
-        occupiedLocations = {}
-        location, locationIndex = GetAvailableLocation(src)
-        
-        if not location then
+        local playerCount = GetNumPlayerIndices()
+        if playerCount > 1 then
+            print("^1[wheel_theft] All locations occupied with " .. playerCount .. " players online")
             TriggerClientEvent('QBCore:Notify', src, 'All work locations are currently occupied. Please wait for one to become available.', 'error')
             return
+        else
+            -- Safety measure: If somehow locations are all occupied with only one player
+            print("^2[wheel_theft] No locations available with only one player, forcing reset")
+            occupiedLocations = {}
+            location, locationIndex = GetAvailableLocation(src)
+            
+            if not location then
+                TriggerClientEvent('QBCore:Notify', src, 'Error getting a location. Please try again.', 'error')
+                return
+            end
         end
     end
 
@@ -235,7 +264,7 @@ AddEventHandler('playerDropped', function()
     
     -- Find and free any locations occupied by this player
     for index, playerId in pairs(occupiedLocations) do
-        if playerId == src then
+        if tonumber(playerId) == tonumber(src) then
             print("^2[wheel_theft] Freeing location " .. index .. " for disconnected player " .. src)
             occupiedLocations[index] = nil
             
