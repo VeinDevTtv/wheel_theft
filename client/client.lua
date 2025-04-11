@@ -732,7 +732,7 @@ function CleanupMissionVehicle()
     if TARGET_VEHICLE and DoesEntityExist(TARGET_VEHICLE) then
         -- Start a timer to delete the vehicle after 10 seconds
         Citizen.CreateThread(function()
-          --  QBCore.Functions.Notify('Target vehicle will be removed in 10 seconds...', 'primary', 5000)
+            QBCore.Functions.Notify('Target vehicle will be removed in 10 seconds...', 'primary', 5000)
             
             -- Wait 10 seconds
             Citizen.Wait(10000)
@@ -753,7 +753,7 @@ function CleanupMissionVehicle()
                 
                 SetEntityAsMissionEntity(TARGET_VEHICLE, true, true)
                 DeleteVehicle(TARGET_VEHICLE)
-              --  QBCore.Functions.Notify('Target vehicle has been cleaned up', 'success', 3000)
+                QBCore.Functions.Notify('Target vehicle has been cleaned up', 'success', 3000)
                 TARGET_VEHICLE = nil
             end
         end)
@@ -790,7 +790,7 @@ function RestoreWheelsForNewMission(vehicle)
         SetVehicleTyreFixed(vehicle, 2)
         SetVehicleTyreFixed(vehicle, 3)
         
-        --QBCore.Functions.Notify('Vehicle wheels have been restored for the new mission!', 'success', 5000)
+        QBCore.Functions.Notify('Vehicle wheels have been restored for the new mission!', 'success', 5000)
         return true
     end
     
@@ -823,6 +823,11 @@ end
 -- At the end of the file, add this event handler
 RegisterNetEvent('ls_wheel_theft:Client:StartMission')
 AddEventHandler('ls_wheel_theft:Client:StartMission', function(location, locationIndex)
+    -- Add debug prints
+    print("^2[wheel_theft] Client:StartMission event received")
+    print("^2[wheel_theft] Location received: " .. json.encode(location))
+    print("^2[wheel_theft] Location index: " .. tostring(locationIndex))
+    
     -- Start the mission with the location provided by the server
     StartMission(location, locationIndex)
 end)

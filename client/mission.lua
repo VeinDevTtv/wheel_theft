@@ -60,7 +60,7 @@ function RegisterPedWithOxTarget(ped)
             onSelect = function()
                 if not cooldown then
                     SetCooldown(3000)
-                    StartMission()
+                    TriggerServerEvent('ls_wheel_theft:StartMission')
                 end
             end
         },
@@ -142,7 +142,7 @@ function EnableMission(missionPed)
 
                         if IsControlJustReleased(0, Keys['E']) and not cooldown then
                             SetCooldown(3000)
-                            StartMission()
+                            TriggerServerEvent('ls_wheel_theft:StartMission')
                         end
                     else
                         Draw3DText(missionPedCoords.x, missionPedCoords.y, missionPedCoords.z, L('Press ~g~[~w~E~g~]~w~ to cancel mission'), 4, 0.065, 0.065)
@@ -272,7 +272,7 @@ function StartNewMissionWithExistingVehicle()
         QBCore.Functions.Notify('The previous vehicle is no longer available. Starting a regular mission.', 'error', 5000)
         FinishMissionCompletely()
         Wait(1000)
-        StartMission()
+        TriggerServerEvent('ls_wheel_theft:StartMission')
         return
     end
     

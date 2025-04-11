@@ -16,6 +16,7 @@ server_scripts {
     'config.lua',
     'server/esx.lua',
     'server/qb.lua',
+    'server/main.lua',
     'server/server.lua',
 }
 

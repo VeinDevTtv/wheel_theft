@@ -21,8 +21,8 @@ Config.qbSettings = {
     account = 'bank',
     payInItems = {
         enabled = true, -- If enabled, player will receive payment in items instead in their account
-        itemName = 'cash',
-        count = math.random(1100, 1600)
+        itemName = 'black_money',
+        count = math.random(1400, 2000)
     }
 }
 
@@ -33,7 +33,7 @@ Config.printLicensePlateToConsole = false
 -- Players can only raise/lower TARGET VEHICLES by default
 Config.jackSystem = {
    ['raise'] = {
-       everyone = true, --everyone can raise any car
+       everyone = false, --everyone can raise any car
 
        -- Only these jobs can raise any car
        jobs = {
@@ -43,7 +43,7 @@ Config.jackSystem = {
        }
    },
    ['lower'] = {
-       everyone = true, --everyone can lower any car
+       everyone = false, --everyone can lower any car
 
        -- Only these jobs can lower any car
        jobs = {

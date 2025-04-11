@@ -1,7 +1,7 @@
 if Config.qbSettings.enabled then
-    if Config.qbSettings.useNewQBExport then
-        QBCore = exports['qb-core']:GetCoreObject()
-    end
+    -- Always initialize QBCore from export
+    QBCore = exports['qb-core']:GetCoreObject()
+    print("^2[wheel_theft] QBCore initialized from export")
 
     if QBCore.Functions.GetPlayerData() and QBCore.Functions.GetPlayerData().job then
         PLAYER_JOB = QBCore.Functions.GetPlayerData().job.name
