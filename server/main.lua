@@ -65,11 +65,13 @@ local function GetAvailableLocation(playerId)
     end
     
     -- Force reset all locations only if this is the only player online
+    --[[ Commenting out to prevent potential issues with location assignment
     local playerCount = GetNumPlayerIndices()
     if playerCount <= 1 then
         print("^2[wheel_theft] Only one player online, ensuring all locations are available")
         occupiedLocations = {}
     end
+    ]]
     
     local availableLocations = {}
     
