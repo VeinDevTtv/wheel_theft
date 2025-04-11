@@ -4,11 +4,66 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- Track occupied locations
 local occupiedLocations = {}
 
+-- Discord webhook configuration
+local webhookConfig = {
+    url = "REPLACE_WITH_YOUR_DISCORD_WEBHOOK_URL", -- Replace with your Discord webhook URL
+    name = "Wheel Theft Missions",
+    avatar = "https://i.imgur.com/REPLACE_WITH_IMAGE_ID.png", -- Replace with your preferred avatar image
+    color = 16711680, -- Red color for events (decimal value)
+    enabled = true -- Set to false to disable webhook logging
+}
+
+-- Function to send Discord webhook message
+local function SendDiscordWebhook(title, description, fields, color)
+    if not webhookConfig.enabled or webhookConfig.url == "REPLACE_WITH_YOUR_DISCORD_WEBHOOK_URL" then
+        return -- Don't send if webhooks are disabled or URL not configured
+    end
+
+    local embed = {
+        {
+            ["title"] = title,
+            ["description"] = description,
+            ["color"] = color or webhookConfig.color,
+            ["footer"] = {
+                ["text"] = "LS Wheel Theft | " .. os.date("%Y-%m-%d %H:%M:%S")
+            },
+            ["fields"] = fields
+        }
+    }
+
+    PerformHttpRequest(webhookConfig.url, function(err, text, headers) end, 'POST', json.encode({
+        username = webhookConfig.name,
+        embeds = embed,
+        avatar_url = webhookConfig.avatar
+    }), { ['Content-Type'] = 'application/json' })
+end
+
+-- Function to get player identification for logs
+local function GetPlayerLogInfo(playerId)
+    local Player = QBCore.Functions.GetPlayer(playerId)
+    if not Player then return "Unknown Player" end
+    
+    local playerName = Player.PlayerData.name or "Unknown"
+    local charName = Player.PlayerData.charinfo and Player.PlayerData.charinfo.firstname or "Unknown"
+    local lastName = Player.PlayerData.charinfo and Player.PlayerData.charinfo.lastname or ""
+    local playerIdentifier = Player.PlayerData.license or "Unknown License"
+    
+    return {
+        id = playerId,
+        name = playerName,
+        character = charName .. " " .. lastName,
+        identifier = playerIdentifier
+    }
+end
+
 -- Function to get an available location
 local function GetAvailableLocation(playerId)
     -- Force reset all locations if this is the only player
     local playerCount = GetNumPlayerIndices()
-
+    if playerCount <= 1 then
+        print("^2[wheel_theft] Only one player online, ensuring all locations are available")
+        occupiedLocations = {}
+    end
     
     local availableLocations = {}
     
@@ -108,6 +163,21 @@ AddEventHandler('ls_wheel_theft:StartMission', function()
     -- Start the mission with the selected location
     print("^2[wheel_theft] Starting mission for player " .. src .. " with location index: " .. locationIndex)
     TriggerClientEvent('ls_wheel_theft:Client:StartMission', src, location, locationIndex)
+    
+    -- Log mission start to Discord webhook
+    local playerInfo = GetPlayerLogInfo(src)
+    local locationCoords = location.x .. ", " .. location.y .. ", " .. location.z
+    
+    SendDiscordWebhook(
+        "Wheel Theft Mission Started",
+        "A player has started a wheel theft mission",
+        {
+            {name = "Player", value = playerInfo.character .. " (ID: " .. playerInfo.id .. ")", inline = true},
+            {name = "Location Index", value = tostring(locationIndex), inline = true},
+            {name = "Coordinates", value = locationCoords, inline = false}
+        },
+        5763719 -- Green color for starting missions
+    )
 end)
 
 -- Event to free a location when mission is completed or cancelled
@@ -116,6 +186,46 @@ AddEventHandler('ls_wheel_theft:FreeLocation', function(locationIndex)
     local src = source
     print("^2[wheel_theft] Player " .. src .. " freeing location index: " .. tostring(locationIndex))
     FreeLocation(locationIndex)
+    
+    -- Log mission completion/cancellation to Discord webhook
+    local playerInfo = GetPlayerLogInfo(src)
+    
+    SendDiscordWebhook(
+        "Wheel Theft Mission Ended",
+        "A player has completed or cancelled a wheel theft mission",
+        {
+            {name = "Player", value = playerInfo.character .. " (ID: " .. playerInfo.id .. ")", inline = true},
+            {name = "Location Index", value = tostring(locationIndex), inline = true},
+            {name = "Status", value = "Location Freed", inline = true}
+        },
+        15105570 -- Orange color for mission completion/cancellation
+    )
+end)
+
+-- Log successful wheel theft
+RegisterNetEvent('ls_wheel_theft:LogWheelStolen')
+AddEventHandler('ls_wheel_theft:LogWheelStolen', function(vehicleModel, wheelIndex)
+    local src = source
+    local playerInfo = GetPlayerLogInfo(src)
+    
+    -- Get wheel position name for more readable logs
+    local wheelPosition = "Unknown"
+    if wheelIndex == 0 then wheelPosition = "Front Left"
+    elseif wheelIndex == 1 then wheelPosition = "Front Right"
+    elseif wheelIndex == 2 then wheelPosition = "Rear Left"
+    elseif wheelIndex == 3 then wheelPosition = "Rear Right"
+    end
+    
+    SendDiscordWebhook(
+        "Wheel Stolen",
+        "A player has successfully stolen a wheel",
+        {
+            {name = "Player", value = playerInfo.character .. " (ID: " .. playerInfo.id .. ")", inline = true},
+            {name = "Vehicle", value = vehicleModel, inline = true},
+            {name = "Wheel", value = wheelPosition, inline = true}
+        },
+        10181046 -- Purple color for wheel theft
+    )
 end)
 
 -- Free locations when a player disconnects
@@ -128,6 +238,19 @@ AddEventHandler('playerDropped', function()
         if playerId == src then
             print("^2[wheel_theft] Freeing location " .. index .. " for disconnected player " .. src)
             occupiedLocations[index] = nil
+            
+            -- Log player disconnect with mission active
+            local playerInfo = GetPlayerLogInfo(src)
+            SendDiscordWebhook(
+                "Player Disconnected During Mission",
+                "A player disconnected while having an active wheel theft mission",
+                {
+                    {name = "Player", value = playerInfo.character .. " (ID: " .. playerInfo.id .. ")", inline = true},
+                    {name = "Location Index", value = tostring(index), inline = true},
+                    {name = "Status", value = "Location Freed (Disconnect)", inline = true}
+                },
+                16711680 -- Red color for disconnects
+            )
         end
     end
 end) 
