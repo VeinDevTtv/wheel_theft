@@ -171,6 +171,14 @@ function CancelMission()
         TriggerServerEvent('ls_wheel_theft:FreeLocation', CURRENT_LOCATION_INDEX)
         CURRENT_LOCATION_INDEX = nil
     end
+    
+    -- Reset mission tracking variables
+    MISSION_START_TIME = 0
+    MISSION_OWNER_ID = nil
+    
+    if DEBUG_MODE then
+        print("^2[DEBUG] Mission cancelled, reset mission data")
+    end
 
     -- Despawn the work vehicle if it exists
     -- This ensures the truck is only removed when a player explicitly cancels the mission by speaking to the NPC
@@ -242,6 +250,14 @@ function FinishMissionCompletely()
         CURRENT_LOCATION_INDEX = nil
     end
     
+    -- Reset mission data
+    MISSION_START_TIME = 0
+    MISSION_OWNER_ID = nil
+    
+    if DEBUG_MODE then
+        print("^2[DEBUG] Mission completed, reset mission data")
+    end
+    
     -- Reset payment state for future missions
     LocalPlayer.state.AlreadyPaid = false
     
@@ -298,6 +314,7 @@ end
 -- Function to start a mission with a pre-existing vehicle
 function StartMissionWithExistingVehicle(vehicle)
     MISSION_ACTIVATED = true
+    MISSION_OWNER_ID = GetPlayerServerId(PlayerId())
     
     -- Verify we have a valid vehicle models array
     if not Config.vehicleModels or #Config.vehicleModels == 0 then

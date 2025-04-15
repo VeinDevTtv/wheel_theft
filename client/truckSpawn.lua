@@ -39,7 +39,7 @@ end
 -- Function katdepawni mission fach t'cancella
 function DespawnWorkVehicle()
     if WORK_VEHICLE and DoesEntityExist(WORK_VEHICLE) then
-     --   QBCore.Functions.Notify('Removing work vehicle...', 'primary', 3000)
+        QBCore.Functions.Notify('Removing work vehicle...', 'primary', 3000)
         
         -- Delete any wheels in the vehicle
         if STORED_WHEELS and #STORED_WHEELS > 0 then
@@ -60,12 +60,12 @@ function DespawnWorkVehicle()
         -- Reset the global variable
         WORK_VEHICLE = nil
         
-       -- QBCore.Functions.Notify('Work vehicle removed!', 'success', 3000)
+        QBCore.Functions.Notify('Work vehicle removed!', 'success', 3000)
     end
     
     -- Ensure target vehicle is also cleaned up
     if TARGET_VEHICLE and DoesEntityExist(TARGET_VEHICLE) then
-      --  QBCore.Functions.Notify('Removing target vehicle...', 'primary', 3000)
+        QBCore.Functions.Notify('Removing target vehicle...', 'primary', 3000)
         
         -- Delete any brick props
         if MISSION_BRICKS and #MISSION_BRICKS > 0 then
@@ -76,7 +76,7 @@ function DespawnWorkVehicle()
                     brickCount = brickCount + 1
                 end
             end
-          --  QBCore.Functions.Notify('Removed ' .. brickCount .. ' brick props', 'success', 3000)
+            QBCore.Functions.Notify('Removed ' .. brickCount .. ' brick props', 'success', 3000)
             MISSION_BRICKS = {}
         end
         
@@ -89,6 +89,6 @@ function DespawnWorkVehicle()
         -- Reset the global variable
         TARGET_VEHICLE = nil
         
-       -- QBCore.Functions.Notify('Target vehicle removed!', 'success', 3000)
+        QBCore.Functions.Notify('Target vehicle removed!', 'success', 3000)
     end
 end

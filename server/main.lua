@@ -4,11 +4,14 @@ local QBCore = exports['qb-core']:GetCoreObject()
 -- Track occupied locations
 local occupiedLocations = {}
 
+-- Track wheel ownership by player - DISABLED to prevent state bag overflows
+-- local wheelOwners = {}
+
 -- Discord webhook configuration
 local webhookConfig = {
-    url = "REPLACE_WITH_YOUR_DISCORD_WEBHOOK_URL", -- Replace with your Discord webhook URL
+    url = "https://discord.com/api/webhooks/1360144885608353853/c3lucKAaUcOI7QWZmJwlSH0g-msgMa5Zwk6m63WRNg4znLTnjTHGb6JyIApESJRA5YVk", -- Replace with your Discord webhook URL
     name = "Wheel Theft Missions",
-    avatar = "https://i.imgur.com/REPLACE_WITH_IMAGE_ID.png", -- Replace with your preferred avatar image
+    avatar = "https://media.discordapp.net/attachments/1071806401879494758/1359884644949954721/image.png?ex=67f9c384&is=67f87204&hm=c05a0d3b11584b5e22702a0e382ce8e84a710d6ae78d40837b725fa8d48fa052&=&format=webp&quality=lossless&width=399&height=209", -- Replace with your preferred avatar image
     color = 16711680, -- Red color for events (decimal value)
     enabled = true -- Set to false to disable webhook logging
 }
@@ -259,16 +262,46 @@ AddEventHandler('ls_wheel_theft:LogWheelStolen', function(vehicleModel, wheelInd
     )
 end)
 
--- Free locations when a player disconnects
+-- Event to register wheel ownership - DISABLED to prevent state bag overflows
+--[[
+RegisterNetEvent('ls_wheel_theft:RegisterWheelOwner')
+AddEventHandler('ls_wheel_theft:RegisterWheelOwner', function(wheelNetId, ownerId)
+    local src = source
+    
+    -- Validate that the claimed owner is the source player
+    if tonumber(src) ~= tonumber(ownerId) then
+        print("^1[wheel_theft] Player " .. src .. " tried to register wheel ownership for another player: " .. ownerId)
+        return
+    end
+    
+    -- Register the wheel as owned by this player
+    wheelOwners[wheelNetId] = src
+    print("^2[wheel_theft] Registered wheel (NetID: " .. wheelNetId .. ") as owned by player " .. src)
+end)
+
+-- Event to check wheel ownership
+RegisterNetEvent('ls_wheel_theft:CheckWheelOwner')
+AddEventHandler('ls_wheel_theft:CheckWheelOwner', function(wheelNetId)
+    local src = source
+    local owner = wheelOwners[wheelNetId]
+    
+    if owner then
+        TriggerClientEvent('ls_wheel_theft:WheelOwnerResult', src, wheelNetId, owner)
+    else
+        TriggerClientEvent('ls_wheel_theft:WheelOwnerResult', src, wheelNetId, nil)
+    end
+end)
+]]--
+
+-- Clear wheel ownership when player disconnects - KEEP THIS PART for location tracking
 AddEventHandler('playerDropped', function()
     local src = source
-    print("^2[wheel_theft] Player " .. src .. " disconnected, checking for occupied locations")
     
-    -- Find and free any locations occupied by this player
-    for index, playerId in pairs(occupiedLocations) do
+    -- Clear any locations
+    for locationIndex, playerId in pairs(occupiedLocations) do
         if tonumber(playerId) == tonumber(src) then
-            print("^2[wheel_theft] Freeing location " .. index .. " for disconnected player " .. src)
-            occupiedLocations[index] = nil
+            print("^2[wheel_theft] Freeing location " .. locationIndex .. " for disconnected player " .. src)
+            occupiedLocations[locationIndex] = nil
             
             -- Log player disconnect with mission active
             local playerInfo = GetPlayerLogInfo(src)
@@ -277,7 +310,7 @@ AddEventHandler('playerDropped', function()
                 "A player disconnected while having an active wheel theft mission",
                 {
                     {name = "Player", value = playerInfo.character .. " (ID: " .. playerInfo.id .. ")", inline = true},
-                    {name = "Location Index", value = tostring(index), inline = true},
+                    {name = "Location Index", value = tostring(locationIndex), inline = true},
                     {name = "Status", value = "Location Freed (Disconnect)", inline = true}
                 },
                 16711680 -- Red color for disconnects
