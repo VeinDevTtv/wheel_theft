@@ -483,6 +483,38 @@ function SpawnPed(selling)
     end
 
     local ped = CreatePed(0, model, loc.x, loc.y, loc.z - 1.0, loc.h, false, false)
+    
+    -- Ensure the ped is properly networked
+    if ped and DoesEntityExist(ped) then
+        -- Set as mission entity to prevent cleanup
+        SetEntityAsMissionEntity(ped, true, true)
+        
+        -- Ensure it's networked
+        if not NetworkGetEntityIsNetworked(ped) then
+            NetworkRegisterEntityAsNetworked(ped)
+            Citizen.Wait(100) -- Small wait to let networking complete
+        end
+        
+        -- Request control if needed
+        if not NetworkHasControlOfEntity(ped) then
+            NetworkRequestControlOfEntity(ped)
+            local attempts = 0
+            while not NetworkHasControlOfEntity(ped) and attempts < 5 do
+                Citizen.Wait(100)
+                attempts = attempts + 1
+            end
+        end
+        
+        -- Verify we have a network ID
+        local netId = NetworkGetNetworkIdFromEntity(ped)
+        if netId == 0 and DEBUG_MODE then
+            print("^1[DEBUG] Warning: Ped created but couldn't get network ID")
+        else if DEBUG_MODE then
+            print("^2[DEBUG] Created ped with NetID: " .. netId)
+        end
+        end
+    end
+    
     SetModelAsNoLongerNeeded(model)
     SetEntityInvincible(ped, true)
     FreezeEntityPosition(ped, true)

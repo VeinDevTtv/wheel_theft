@@ -76,7 +76,7 @@ function EnableSale()
     local blip = sellerTable.blip
     local cratePropModel = sellerTable.wheelDropOff.crateProp
     local wheelDropOffCoords = sellerTable.wheelDropOff.location
-    local crateProp = SpawnProp(cratePropModel, wheelDropOffCoords)
+    local crateProp = CreateCrateProp(wheelDropOffCoords)
 
     if not DoesEntityExist(ped) then
         QBCore.Functions.Notify('ERROR: Failed to spawn seller ped', 'error', 5000)
@@ -89,8 +89,8 @@ function EnableSale()
     end
 
     -- Store references to clean up later
-    sellerPedNetId = NetworkGetNetworkIdFromEntity(ped)
-    cratePropNetId = NetworkGetNetworkIdFromEntity(crateProp)
+    sellerPedNetId = NetworkSafeGetNetworkId(ped)
+    cratePropNetId = NetworkSafeGetNetworkId(crateProp)
     
     FreezeEntityPosition(crateProp, true)
     FreezeEntityPosition(ped, true)
@@ -113,7 +113,7 @@ function RegisterSellerPedWithOxTarget(sellerPed)
     if not sellerPed or not DoesEntityExist(sellerPed) then return end
 
     -- Get network ID for tracking
-    sellerPedNetId = NetworkGetNetworkIdFromEntity(sellerPed)
+    sellerPedNetId = NetworkSafeGetNetworkId(sellerPed)
     
     -- Clear any existing targets for this entity to prevent duplicates
     if sellerPedNetId then
@@ -140,7 +140,9 @@ function RegisterSellerPedWithOxTarget(sellerPed)
     }
     
     -- Debug info
-    QBCore.Functions.Notify('Registering seller with target system (NetID: ' .. sellerPedNetId .. ')', 'primary', 2000)
+    if DEBUG_MODE then
+        QBCore.Functions.Notify('Registering seller with target system (NetID: ' .. sellerPedNetId .. ')', 'primary', 2000)
+    end
     
     -- Register with ox_target using just the entity
     exports.ox_target:addLocalEntity(sellerPed, options)
@@ -152,7 +154,7 @@ function RegisterCrateWithOxTarget(crateProp)
     if not crateProp or not DoesEntityExist(crateProp) then return end
     
     -- Get network ID for tracking
-    cratePropNetId = NetworkGetNetworkIdFromEntity(crateProp)
+    cratePropNetId = NetworkSafeGetNetworkId(crateProp)
     
     -- Clear any existing targets for this entity to prevent duplicates
     if cratePropNetId then
@@ -186,7 +188,9 @@ function RegisterCrateWithOxTarget(crateProp)
     }
     
     -- Debug info
-    QBCore.Functions.Notify('Registering crate with target system (NetID: ' .. cratePropNetId .. ')', 'primary', 2000)
+    if DEBUG_MODE then
+        QBCore.Functions.Notify('Registering crate with target system (NetID: ' .. cratePropNetId .. ')', 'primary', 2000)
+    end
     
     -- Register with ox_target using local entity
     exports.ox_target:addLocalEntity(crateProp, options)
@@ -360,4 +364,57 @@ function DropOffWheel(crateProp, wheelCount)
     if wheelCount == 4 then
         QBCore.Functions.Notify('All wheels have been dropped off. Speak to the seller to complete the sale!', 'success', 5000)
     end
+end
+
+-- Function to create the crate prop at the seller location
+function CreateCrateProp(coords)
+    RequestModel(Config.selling.crateModel)
+    while not HasModelLoaded(Config.selling.crateModel) do
+        Citizen.Wait(100)
+    end
+    
+    local crateCoords = vector3(coords.x + Config.selling.crateOffset.x, coords.y + Config.selling.crateOffset.y, coords.z + Config.selling.crateOffset.z)
+    local crateProp = CreateObject(GetHashKey(Config.selling.crateModel), crateCoords.x, crateCoords.y, crateCoords.z, true, true, true)
+    
+    -- Ensure the crate is properly networked
+    if crateProp and DoesEntityExist(crateProp) then
+        -- Set as mission entity to prevent cleanup
+        SetEntityAsMissionEntity(crateProp, true, true)
+        
+        -- Ensure it's networked and we have control over it
+        if not NetworkGetEntityIsNetworked(crateProp) then
+            NetworkRegisterEntityAsNetworked(crateProp)
+            
+            -- Wait for networking to complete
+            local attempts = 0
+            while not NetworkGetEntityIsNetworked(crateProp) and attempts < 5 do
+                Citizen.Wait(100)
+                attempts = attempts + 1
+            end
+        end
+        
+        -- Get control of entity if needed
+        if not NetworkHasControlOfEntity(crateProp) then
+            NetworkRequestControlOfEntity(crateProp)
+            local attempts = 0
+            while not NetworkHasControlOfEntity(crateProp) and attempts < 5 do
+                Citizen.Wait(100)
+                attempts = attempts + 1
+            end
+        end
+        
+        -- Verify we have a network ID
+        local netId = NetworkGetNetworkIdFromEntity(crateProp)
+        if netId == 0 and DEBUG_MODE then
+            print("^1[DEBUG] Warning: Crate prop created but couldn't get network ID")
+        else if DEBUG_MODE then
+            print("^2[DEBUG] Created crate prop with NetID: " .. netId)
+        end
+        end
+    end
+    
+    SetEntityHeading(crateProp, coords.h)
+    FreezeEntityPosition(crateProp, true)
+    
+    return crateProp
 end
