@@ -42,6 +42,45 @@ function DebugNetworkEntity(entity, entityName)
     return isNetworked and hasNetworkId
 end
 
+-- Function to ensure a valid network ID is retrieved
+function NetworkSafeGetNetworkId(entity)
+    if not DoesEntityExist(entity) then
+        return 0
+    end
+    
+    -- Ensure entity is networked before getting ID
+    if not NetworkGetEntityIsNetworked(entity) then
+        NetworkRegisterEntityAsNetworked(entity)
+        -- Wait for networking to complete
+        local attempts = 0
+        while not NetworkGetEntityIsNetworked(entity) and attempts < 5 do
+            Citizen.Wait(100)
+            attempts = attempts + 1
+        end
+    end
+    
+    -- Get control of entity if needed
+    if not NetworkHasControlOfEntity(entity) then
+        NetworkRequestControlOfEntity(entity)
+        local attempts = 0
+        while not NetworkHasControlOfEntity(entity) and attempts < 5 do
+            Citizen.Wait(100)
+            attempts = attempts + 1
+        end
+    end
+    
+    -- Now get the network ID
+    local netId = NetworkGetNetworkIdFromEntity(entity)
+    
+    -- For mission entities, ensure they stay networked
+    if netId ~= 0 then
+        SetEntityAsMissionEntity(entity, true, true)
+        NetworkSetNetworkIdDynamic(netId, false)
+    end
+    
+    return netId
+end
+
 -- Function to ensure entity is properly networked
 function EnsureEntityIsNetworked(entity, entityName, maxAttempts)
     if not DEBUG_MODE then return true end
@@ -351,7 +390,7 @@ function StopWheelTheft(vehicle)
     if Config.target.enabled then
         -- The ox_target is already set up in RegisterTargetVehicleWithOxTarget
         -- We just need to make sure the vehicle network ID is tracked for cleanup
-        local netId = NetworkGetNetworkIdFromEntity(vehicle)
+        local netId = NetworkSafeGetNetworkId(vehicle)
         if not Contains(targetVehicleNetIds, netId) then
             table.insert(targetVehicleNetIds, netId)
         end
@@ -427,7 +466,7 @@ function RegisterTargetVehicleWithOxTarget(vehicle, isTargetVehicle)
         return
     end
     
-    local netId = NetworkGetNetworkIdFromEntity(vehicle)
+    local netId = NetworkSafeGetNetworkId(vehicle)
     
     -- Debug check for valid network ID
     if netId == 0 and DEBUG_MODE then
@@ -636,7 +675,7 @@ function RegisterTruckWithOxTarget(vehicle)
     SetEntityAsMissionEntity(vehicle, true, true)
     
     -- Get network ID of the truck (should be valid now)
-    local netId = NetworkGetNetworkIdFromEntity(vehicle)
+    local netId = NetworkSafeGetNetworkId(vehicle)
     
     -- Debug check for valid network ID
     if netId == 0 then
@@ -1117,7 +1156,7 @@ function RegisterTruckForWheelRetrieval(vehicle)
     end
     
     -- Get network ID of the truck
-    local netId = NetworkGetNetworkIdFromEntity(vehicle)
+    local netId = NetworkSafeGetNetworkId(vehicle)
     
     -- Make sure network ID is valid
     if netId == 0 then
@@ -1212,20 +1251,40 @@ function PutWheelInTruckBed(vehicle, wheelIndex)
     local coords = GetWorldPositionOfEntityBone(vehicle, boneIndex)
     local wheelProp = SpawnWheelPropAttached(vehicle, coords.x, coords.y, coords.z + 0.4)
     
-    -- Record this wheel as owned by this player but only locally
-    -- This avoids state bag overflow issues
-    local wheelInfo = {
-        entity = wheelProp,
-        netId = NetworkGetNetworkIdFromEntity(wheelProp),
-        ownerId = GetPlayerServerId(PlayerId()),
-        timestamp = GetGameTimer()
-    }
-    
-    -- Store only locally to avoid state bag overflow
-    table.insert(myWheelProps, wheelInfo)
-    
-    if DEBUG_MODE then
-        print("^2[DEBUG] Stored wheel in truck. Local tracking only.")
+    -- Ensure the wheel prop is networked properly
+    if wheelProp and DoesEntityExist(wheelProp) then
+        -- Make sure it's set as mission entity
+        SetEntityAsMissionEntity(wheelProp, true, true)
+        
+        -- Force network registration if needed
+        if not NetworkGetEntityIsNetworked(wheelProp) then
+            NetworkRegisterEntityAsNetworked(wheelProp)
+            Citizen.Wait(100) -- Small wait to let networking complete
+        end
+        
+        -- Get a valid network ID
+        local netId = NetworkSafeGetNetworkId(wheelProp)
+        
+        -- Record this wheel as owned by this player but only locally
+        -- This avoids state bag overflow issues
+        local wheelInfo = {
+            entity = wheelProp,
+            netId = netId,
+            ownerId = GetPlayerServerId(PlayerId()),
+            timestamp = GetGameTimer()
+        }
+        
+        -- Store only locally to avoid state bag overflow
+        table.insert(myWheelProps, wheelInfo)
+        
+        if DEBUG_MODE then
+            print("^2[DEBUG] Stored wheel in truck. NetID: " .. netId .. " | Local tracking only.")
+        end
+    else
+        if DEBUG_MODE then
+            print("^1[DEBUG] Failed to create or network wheel prop")
+            QBCore.Functions.Notify("DEBUG: Failed to create wheel prop", "error", 3000)
+        end
     end
     
     return wheelProp

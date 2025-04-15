@@ -130,6 +130,30 @@ function PutWheelInHands()
     end
 
     local wheel = CreateObject(GetHashKey(Settings.wheelTakeOff.wheelModel), playerCoords.x, playerCoords.y, playerCoords.z, true, true, true)
+    
+    -- Ensure the wheel is networked
+    if wheel and DoesEntityExist(wheel) then
+        -- Set as mission entity to prevent cleanup
+        SetEntityAsMissionEntity(wheel, true, true)
+        
+        -- Ensure it's networked
+        if not NetworkGetEntityIsNetworked(wheel) then
+            NetworkRegisterEntityAsNetworked(wheel)
+            Citizen.Wait(100) -- Small wait to let networking complete
+        end
+        
+        -- Verify we have a network ID
+        local netId = NetworkGetNetworkIdFromEntity(wheel)
+        if netId == 0 and DEBUG_MODE then
+            print("^1[DEBUG] Warning: Wheel prop created but couldn't get network ID")
+        else if DEBUG_MODE then
+            print("^2[DEBUG] Created wheel prop with NetID: " .. netId)
+        end
+        end
+    else if DEBUG_MODE then
+        print("^1[DEBUG] Failed to create wheel prop object")
+    end
+    end
 
     local handBone = Settings.wheelTakeOff.wheelOffset.bone
     local offsetCoords = Settings.wheelTakeOff.wheelOffset.loc
@@ -149,6 +173,40 @@ function SpawnProp(prop, coords)
     end
 
     local object = CreateObject(GetHashKey(prop), coords.x, coords.y, coords.z, true, true, true)
+    
+    -- Ensure the object is networked
+    if object and DoesEntityExist(object) then
+        -- Set as mission entity to prevent cleanup
+        SetEntityAsMissionEntity(object, true, true)
+        
+        -- Ensure it's networked
+        if not NetworkGetEntityIsNetworked(object) then
+            NetworkRegisterEntityAsNetworked(object)
+            Citizen.Wait(100) -- Small wait to let networking complete
+        end
+        
+        -- Request control if needed
+        if not NetworkHasControlOfEntity(object) then
+            NetworkRequestControlOfEntity(object)
+            local attempts = 0
+            while not NetworkHasControlOfEntity(object) and attempts < 5 do
+                Citizen.Wait(100)
+                attempts = attempts + 1
+            end
+        end
+        
+        -- Verify we have a network ID
+        local netId = NetworkGetNetworkIdFromEntity(object)
+        if netId == 0 and DEBUG_MODE then
+            print("^1[DEBUG] Warning: Prop created but couldn't get network ID: " .. prop)
+        else if DEBUG_MODE then
+            print("^2[DEBUG] Created prop with NetID: " .. netId .. " | Prop: " .. prop)
+        end
+        end
+    else if DEBUG_MODE then
+        print("^1[DEBUG] Failed to create prop object: " .. prop)
+    end
+    end
 
     return object
 end
@@ -164,6 +222,30 @@ function PutWheelInTruckBed(vehicle, wheelCount)
     local zTable = {0.4, 0.6, 0.8, 1.0}
     local vehicleBedCoords = GetOffsetFromEntityInWorldCoords(vehicle, 0.0, -1.5, 0.2)
     local wheel = CreateObject(GetHashKey(Settings.wheelTakeOff.wheelModel), vehicleBedCoords.x, vehicleBedCoords.y, vehicleBedCoords.z, true, true, true)
+    
+    -- Ensure the wheel is networked
+    if wheel and DoesEntityExist(wheel) then
+        -- Set as mission entity to prevent cleanup
+        SetEntityAsMissionEntity(wheel, true, true)
+        
+        -- Ensure it's networked
+        if not NetworkGetEntityIsNetworked(wheel) then
+            NetworkRegisterEntityAsNetworked(wheel)
+            Citizen.Wait(100) -- Small wait to let networking complete
+        end
+        
+        -- Verify we have a network ID
+        local netId = NetworkGetNetworkIdFromEntity(wheel)
+        if netId == 0 and DEBUG_MODE then
+            print("^1[DEBUG] Warning: Truck bed wheel prop created but couldn't get network ID")
+        else if DEBUG_MODE then
+            print("^2[DEBUG] Created truck bed wheel prop with NetID: " .. netId)
+        end
+        end
+    else if DEBUG_MODE then
+        print("^1[DEBUG] Failed to create truck bed wheel prop object")
+    end
+    end
 
     local handBone = 0
     local offsetCoords = vector3(0.0, -1.5, zTable[wheelCount])
